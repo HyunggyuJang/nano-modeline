@@ -196,82 +196,82 @@ Modeline is composed as:
 					       'nano-modeline-inactive-secondary)))))
 
 ;; ---------------------------------------------------------------------
-(defun nano-modeline-mu4e-dashboard-mode-p ()
-  (bound-and-true-p mu4e-dashboard-mode))
+;; (defun nano-modeline-mu4e-dashboard-mode-p ()
+;;   (bound-and-true-p mu4e-dashboard-mode))
 
-(defun nano-modeline-mu4e-dashboard-mode ()
-  (nano-modeline-compose (nano-modeline-status)
-                         "Mail"
-                         (nano-modeline-mu4e-context)
-                         (format "%d messages" (plist-get mu4e~server-props :doccount))))
+;; (defun nano-modeline-mu4e-dashboard-mode ()
+;;   (nano-modeline-compose (nano-modeline-status)
+;;                          "Mail"
+;;                          (nano-modeline-mu4e-context)
+;;                          (format "%d messages" (plist-get mu4e~server-props :doccount))))
 
 ;; ---------------------------------------------------------------------
 ;; since the EIN library itself is constantly re-rendering the notebook, and thus
 ;; re-setting the header-line-format, we cannot use the nano-modeline function to set
 ;; the header format in a notebook buffer.  Fortunately, EIN exposes the
 ;; ein:header-line-format variable for just this purpose.
-(with-eval-after-load 'ein
-  (defun nano-modeline-ein-notebook-mode ()
-    (let ((buffer-name (format-mode-line "%b")))
-      (nano-modeline-compose (if (ein:notebook-modified-p) "**" "RW")
-                             buffer-name
-                             ""
-                             (ein:header-line))))
-  (setq ein:header-line-format '((:eval (nano-modeline-ein-notebook-mode)))))
+;; (with-eval-after-load 'ein
+;;   (defun nano-modeline-ein-notebook-mode ()
+;;     (let ((buffer-name (format-mode-line "%b")))
+;;       (nano-modeline-compose (if (ein:notebook-modified-p) "**" "RW")
+;;                              buffer-name
+;;                              ""
+;;                              (ein:header-line))))
+;;   (setq ein:header-line-format '((:eval (nano-modeline-ein-notebook-mode)))))
 
 ;; ---------------------------------------------------------------------
-(defun nano-modeline-elfeed-search-mode-p ()
-  (derived-mode-p 'elfeed-search-mode))
+;; (defun nano-modeline-elfeed-search-mode-p ()
+;;   (derived-mode-p 'elfeed-search-mode))
 
-(defun nano-modeline-elfeed-search-mode ()
-  (nano-modeline-compose (nano-modeline-status)
-                         "Elfeed"
-                         (concat "(" (elfeed-search--header)  ")")
-                         ""))
+;; (defun nano-modeline-elfeed-search-mode ()
+;;   (nano-modeline-compose (nano-modeline-status)
+;;                          "Elfeed"
+;;                          (concat "(" (elfeed-search--header)  ")")
+;;                          ""))
 
-;; Elfeed (regular header)
-(with-eval-after-load 'elfeed
-  (defun elfeed-setup-header ()
-    (setq header-line-format (default-value 'header-line-format)))
-  (setq elfeed-search-header-function #'elfeed-setup-header))
-
-;; ---------------------------------------------------------------------
-(defun nano-modeline-elfeed-show-mode-p ()
-  (derived-mode-p 'elfeed-show-mode))
-
-(defun nano-modeline-elfeed-show-mode ()
-  (let* ((title        (elfeed-entry-title elfeed-show-entry))
-         (tags         (elfeed-entry-tags elfeed-show-entry))
-         (tags-str     (mapconcat #'symbol-name tags ", "))
-         (date         (seconds-to-time (elfeed-entry-date elfeed-show-entry)))
-         (feed         (elfeed-entry-feed elfeed-show-entry))
-         (feed-title   (plist-get (elfeed-feed-meta feed) :title))
-         (entry-author (elfeed-meta elfeed-show-entry :author)))
-    (nano-modeline-compose (nano-modeline-status)
-                           (s-truncate 40 title "…")
-                           (concat "(" tags-str ")")
-                           feed-title)))
+;; ;; Elfeed (regular header)
+;; (with-eval-after-load 'elfeed
+;;   (defun elfeed-setup-header ()
+;;     (setq header-line-format (default-value 'header-line-format)))
+;;   (setq elfeed-search-header-function #'elfeed-setup-header))
 
 ;; ---------------------------------------------------------------------
-(defun nano-modeline-calendar-mode-p ()
-  (derived-mode-p 'calendar-mode))
+;; (defun nano-modeline-elfeed-show-mode-p ()
+;;   (derived-mode-p 'elfeed-show-mode))
 
-(defun nano-modeline-calendar-mode () "")
+;; (defun nano-modeline-elfeed-show-mode ()
+;;   (let* ((title        (elfeed-entry-title elfeed-show-entry))
+;;          (tags         (elfeed-entry-tags elfeed-show-entry))
+;;          (tags-str     (mapconcat #'symbol-name tags ", "))
+;;          (date         (seconds-to-time (elfeed-entry-date elfeed-show-entry)))
+;;          (feed         (elfeed-entry-feed elfeed-show-entry))
+;;          (feed-title   (plist-get (elfeed-feed-meta feed) :title))
+;;          (entry-author (elfeed-meta elfeed-show-entry :author)))
+;;     (nano-modeline-compose (nano-modeline-status)
+;;                            (s-truncate 40 title "…")
+;;                            (concat "(" tags-str ")")
+;;                            feed-title)))
 
-;; Calendar (no header, only overline)
-(with-eval-after-load 'calendar
-  (defun calendar-setup-header ()
-    (setq header-line-format "")
-    (face-remap-add-relative
-     'header-line `(:overline ,(face-foreground 'default)
-                    :height 0.5
-                    :background ,(face-background 'default))))
-  (add-hook 'calendar-initial-window-hook #'calendar-setup-header)
+;; ---------------------------------------------------------------------
+;; (defun nano-modeline-calendar-mode-p ()
+;;   (derived-mode-p 'calendar-mode))
 
-  ;; From https://emacs.stackexchange.com/questions/45650
-  (add-to-list 'display-buffer-alist
-               `(,(rx string-start "*Calendar*" string-end)
-                 (display-buffer-below-selected))))
+;; (defun nano-modeline-calendar-mode () "")
+
+;; ;; Calendar (no header, only overline)
+;; (with-eval-after-load 'calendar
+;;   (defun calendar-setup-header ()
+;;     (setq header-line-format "")
+;;     (face-remap-add-relative
+;;      'header-line `(:overline ,(face-foreground 'default)
+;;                     :height 0.5
+;;                     :background ,(face-background 'default))))
+;;   (add-hook 'calendar-initial-window-hook #'calendar-setup-header)
+
+;;   ;; From https://emacs.stackexchange.com/questions/45650
+;;   (add-to-list 'display-buffer-alist
+;;                `(,(rx string-start "*Calendar*" string-end)
+;;                  (display-buffer-below-selected))))
 
 ;; ---------------------------------------------------------------------
 (defun nano-modeline-org-capture-mode-p ()
@@ -357,63 +357,63 @@ Modeline is composed as:
                          (shorten-directory default-directory 32)))
 
 ;; ---------------------------------------------------------------------
-(defun nano-modeline-mu4e-main-mode-p ()
-  (derived-mode-p 'mu4e-main-mode))
+;; (defun nano-modeline-mu4e-main-mode-p ()
+;;   (derived-mode-p 'mu4e-main-mode))
 
-(defun nano-modeline-mu4e-main-mode ()
-  (nano-modeline-compose (nano-modeline-status)
-                         "Mail"
-                         (nano-modeline-mu4e-context)
-                         (format-time-string "%A %d %B %Y, %H:%M")))
-
-;; ---------------------------------------------------------------------
-(defun nano-modeline-mu4e-headers-mode-p ()
-  (derived-mode-p 'mu4e-headers-mode))
-
-(defun nano-modeline-mu4e-headers-mode ()
-  (nano-modeline-compose (nano-modeline-status)
-                         (mu4e~quote-for-modeline mu4e~headers-last-query)
-                         ""
-                         ""))
-
-(with-eval-after-load 'mu4e
-  (defun mu4e~header-line-format () (nano-modeline)))
+;; (defun nano-modeline-mu4e-main-mode ()
+;;   (nano-modeline-compose (nano-modeline-status)
+;;                          "Mail"
+;;                          (nano-modeline-mu4e-context)
+;;                          (format-time-string "%A %d %B %Y, %H:%M")))
 
 ;; ---------------------------------------------------------------------
-(setq mu4e-modeline-max-width 72)
+;; (defun nano-modeline-mu4e-headers-mode-p ()
+;;   (derived-mode-p 'mu4e-headers-mode))
 
-(defun nano-modeline-mu4e-view-mode-p ()
-  (derived-mode-p 'mu4e-view-mode))
+;; (defun nano-modeline-mu4e-headers-mode ()
+;;   (nano-modeline-compose (nano-modeline-status)
+;;                          (mu4e~quote-for-modeline mu4e~headers-last-query)
+;;                          ""
+;;                          ""))
 
-(defun nano-modeline-mu4e-view-mode ()
-  (let* ((msg     (mu4e-message-at-point))
-         (subject (mu4e-message-field msg :subject))
-         (from    (mu4e~headers-contact-str (mu4e-message-field msg :from)))
-         (date     (mu4e-message-field msg :date)))
-    (nano-modeline-compose (nano-modeline-status)
-                           (s-truncate 40 subject "…")
-                           ""
-                           from)))
+;; (with-eval-after-load 'mu4e
+;;   (defun mu4e~header-line-format () (nano-modeline)))
 
-(defun nano-modeline-mu4e-view-hook ()
-  (setq header-line-format "%-")
-  (face-remap-add-relative 'header-line
-                           '(:background "#ffffff"
-                                         :underline nil
-                                         :box nil
-                                         :height 1.0)))
+;; ---------------------------------------------------------------------
+;; (setq mu4e-modeline-max-width 72)
+
+;; (defun nano-modeline-mu4e-view-mode-p ()
+;;   (derived-mode-p 'mu4e-view-mode))
+
+;; (defun nano-modeline-mu4e-view-mode ()
+;;   (let* ((msg     (mu4e-message-at-point))
+;;          (subject (mu4e-message-field msg :subject))
+;;          (from    (mu4e~headers-contact-str (mu4e-message-field msg :from)))
+;;          (date     (mu4e-message-field msg :date)))
+;;     (nano-modeline-compose (nano-modeline-status)
+;;                            (s-truncate 40 subject "…")
+;;                            ""
+;;                            from)))
+
+;; (defun nano-modeline-mu4e-view-hook ()
+;;   (setq header-line-format "%-")
+;;   (face-remap-add-relative 'header-line
+;;                            '(:background "#ffffff"
+;;                                          :underline nil
+;;                                          :box nil
+;;                                          :height 1.0)))
 ;; (add-hook 'mu4e-view-mode-hook #'nano-modeline-mu4e-view-hook)
 
 
 ;; ---------------------------------------------------------------------
-(defun nano-modeline-nano-help-mode-p ()
-  (derived-mode-p 'nano-help-mode))
+;; (defun nano-modeline-nano-help-mode-p ()
+;;   (derived-mode-p 'nano-help-mode))
 
-(defun nano-modeline-nano-help-mode ()
-  (nano-modeline-compose (nano-modeline-status)
-                         "GNU Emacs / N Λ N O"
-                         "(help)"
-                         ""))
+;; (defun nano-modeline-nano-help-mode ()
+;;   (nano-modeline-compose (nano-modeline-status)
+;;                          "GNU Emacs / N Λ N O"
+;;                          "(help)"
+;;                          ""))
 
 ;; ---------------------------------------------------------------------
 (defun nano-modeline-message-mode-p ()
@@ -448,26 +448,26 @@ Modeline is composed as:
                              org-mode-line-string)))
 
 ;; ---------------------------------------------------------------------
-(defun nano-modeline-docview-mode-p ()
-  (derived-mode-p 'doc-view-mode))
+;; (defun nano-modeline-docview-mode-p ()
+;;   (derived-mode-p 'doc-view-mode))
 
-(defun nano-modeline-docview-mode ()
-  (let ((buffer-name (format-mode-line "%b"))
-	(mode-name   (nano-mode-name))
-	(branch      (vc-branch))
-	(page-number (concat
-		      (number-to-string (doc-view-current-page)) "/"
-		      (or (ignore-errors
-			    (number-to-string (doc-view-last-page-number)))
-			  "???"))))
-    (nano-modeline-compose
-     (nano-modeline-status)
-     buffer-name
-     (concat "(" mode-name
-	     (if branch (concat ", "
-				(propertize branch 'face 'italic)))
-	     ")" )
-     page-number)))
+;; (defun nano-modeline-docview-mode ()
+;;   (let ((buffer-name (format-mode-line "%b"))
+;; 	(mode-name   (nano-mode-name))
+;; 	(branch      (vc-branch))
+;; 	(page-number (concat
+;; 		      (number-to-string (doc-view-current-page)) "/"
+;; 		      (or (ignore-errors
+;; 			    (number-to-string (doc-view-last-page-number)))
+;; 			  "???"))))
+;;     (nano-modeline-compose
+;;      (nano-modeline-status)
+;;      buffer-name
+;;      (concat "(" mode-name
+;; 	     (if branch (concat ", "
+;; 				(propertize branch 'face 'italic)))
+;; 	     ")" )
+;;      page-number)))
 
 ;; ---------------------------------------------------------------------
 (defun nano-modeline-pdf-view-mode-p ()
@@ -521,23 +521,23 @@ Modeline is composed as:
       (nano-modeline-compose (nano-modeline-status)
                              buffer-name "" position)))
 ;; ---------------------------------------------------------------------
-(with-eval-after-load 'deft
-  (defun deft-print-header ()
-    (force-mode-line-update)
-    (widget-insert "\n")))
+;; (with-eval-after-load 'deft
+;;   (defun deft-print-header ()
+;;     (force-mode-line-update)
+;;     (widget-insert "\n")))
 
-(defun nano-modeline-deft-mode-p ()
-  (derived-mode-p 'deft-mode))
+;; (defun nano-modeline-deft-mode-p ()
+;;   (derived-mode-p 'deft-mode))
 
-(defun nano-modeline-deft-mode ()
-  (let ((prefix " RO ")
-        (primary "Notes")
-        (filter  (if deft-filter-regexp
-                     (deft-whole-filter-regexp) "<filter>"))
-        (matches (if deft-filter-regexp
-                     (format "%d matches" (length deft-current-files))
-                   (format "%d notes" (length deft-all-files)))))
-    (nano-modeline-compose prefix primary filter matches)))
+;; (defun nano-modeline-deft-mode ()
+;;   (let ((prefix " RO ")
+;;         (primary "Notes")
+;;         (filter  (if deft-filter-regexp
+;;                      (deft-whole-filter-regexp) "<filter>"))
+;;         (matches (if deft-filter-regexp
+;;                      (format "%d matches" (length deft-current-files))
+;;                    (format "%d notes" (length deft-all-files)))))
+;;     (nano-modeline-compose prefix primary filter matches)))
     
 
 ;; ---------------------------------------------------------------------
@@ -614,8 +614,8 @@ Modeline is composed as:
 	
 	;; Graphic mode, modeline at top
 	((eq nano-modeline-position 'top)
-	 (setq mode-line-format (list ""))
-	 (setq-default mode-line-format (list ""))
+	 (setq mode-line-format nil)
+	 (setq-default mode-line-format nil)
 	 (set-face-attribute 'mode-line nil :inherit 'nano-modeline-active
 			                    :height 0.1)
 	 (set-face-attribute 'mode-line-inactive nil :inherit 'nano-modeline-inactive
@@ -634,28 +634,28 @@ Modeline is composed as:
 	(cond
 	 ((nano-modeline-prog-mode-p)            (nano-modeline-default-mode))
 	 ((nano-modeline-message-mode-p)         (nano-modeline-message-mode))
-	 ((nano-modeline-elfeed-search-mode-p)   (nano-modeline-elfeed-search-mode))
-	 ((nano-modeline-elfeed-show-mode-p)     (nano-modeline-elfeed-show-mode))
-	 ((nano-modeline-deft-mode-p)            (nano-modeline-deft-mode))
+	 ;; ((nano-modeline-elfeed-search-mode-p)   (nano-modeline-elfeed-search-mode))
+	 ;; ((nano-modeline-elfeed-show-mode-p)     (nano-modeline-elfeed-show-mode))
+	 ;; ((nano-modeline-deft-mode-p)            (nano-modeline-deft-mode))
 	 ((nano-modeline-info-mode-p)            (nano-modeline-info-mode))
-	 ((nano-modeline-calendar-mode-p)        (nano-modeline-calendar-mode))
+	 ;; ((nano-modeline-calendar-mode-p)        (nano-modeline-calendar-mode))
 	 ((nano-modeline-org-capture-mode-p)     (nano-modeline-org-capture-mode))
 	 ((nano-modeline-org-agenda-mode-p)      (nano-modeline-org-agenda-mode))
 	 ((nano-modeline-org-clock-mode-p)       (nano-modeline-org-clock-mode))
 	 ((nano-modeline-term-mode-p)            (nano-modeline-term-mode))
 	 ((nano-modeline-vterm-mode-p)           (nano-modeline-term-mode))
-	 ((nano-modeline-mu4e-dashboard-mode-p)  (nano-modeline-mu4e-dashboard-mode))
-	 ((nano-modeline-mu4e-main-mode-p)       (nano-modeline-mu4e-main-mode))
-	 ((nano-modeline-mu4e-headers-mode-p)    (nano-modeline-mu4e-headers-mode))
-	 ((nano-modeline-mu4e-view-mode-p)       (nano-modeline-mu4e-view-mode))
+	 ;; ((nano-modeline-mu4e-dashboard-mode-p)  (nano-modeline-mu4e-dashboard-mode))
+	 ;; ((nano-modeline-mu4e-main-mode-p)       (nano-modeline-mu4e-main-mode))
+	 ;; ((nano-modeline-mu4e-headers-mode-p)    (nano-modeline-mu4e-headers-mode))
+	 ;; ((nano-modeline-mu4e-view-mode-p)       (nano-modeline-mu4e-view-mode))
 	 ((nano-modeline-text-mode-p)            (nano-modeline-default-mode))
 	 ((nano-modeline-pdf-view-mode-p)        (nano-modeline-pdf-view-mode))
-	 ((nano-modeline-docview-mode-p)         (nano-modeline-docview-mode))
+	 ;; ((nano-modeline-docview-mode-p)         (nano-modeline-docview-mode))
 
 ;;     ((nano-modeline-buffer-menu-mode-p)     (nano-modeline-buffer-menu-mode))
      
 	 ((nano-modeline-completion-list-mode-p) (nano-modeline-completion-list-mode))
-	 ((nano-modeline-nano-help-mode-p)       (nano-modeline-nano-help-mode))
+	 ;; ((nano-modeline-nano-help-mode-p)       (nano-modeline-nano-help-mode))
 	 (t                                      (nano-modeline-default-mode)))))))
     (if (eq nano-modeline-position 'top)
 	(setq-default header-line-format format)
