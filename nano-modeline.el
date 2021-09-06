@@ -614,8 +614,8 @@ Modeline is composed as:
 	
 	;; Graphic mode, modeline at top
 	((eq nano-modeline-position 'top)
-	 (setq mode-line-format nil)
-	 (setq-default mode-line-format nil)
+	 (setq mode-line-format (list ""))
+	 (setq-default mode-line-format (list ""))
 	 (set-face-attribute 'mode-line nil :inherit 'nano-modeline-active
 			                    :height 0.1)
 	 (set-face-attribute 'mode-line-inactive nil :inherit 'nano-modeline-inactive
