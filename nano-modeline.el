@@ -125,18 +125,18 @@ Modeline is composed as:
   "Modeline face for inactive MODIFIED element"
   :group 'nano-modeline-inactive)
 
-(defun vc-branch ()
+(defsubst vc-branch ()
   (if vc-mode
       (let ((backend (vc-backend buffer-file-name)))
         (concat "#" (substring-no-properties vc-mode
                                  (+ (if (eq backend 'Hg) 2 3) 2))))  nil))
 
-(defun nano-mode-name ()
+(defsubst nano-mode-name ()
   (format-mode-line mode-name))
 
 
 ;; From https://amitp.blogspot.com/2011/08/emacs-custom-mode-line.html
-(defun shorten-directory (dir max-length)
+(defun nano-modeline-shorten-directory (dir max-length)
   "Show up to `max-length' characters of a directory name `dir'."
   (let ((path (reverse (split-string (abbreviate-file-name dir) "/")))
         (output ""))
@@ -149,28 +149,36 @@ Modeline is composed as:
       (setq output (concat "…/" output)))
     output))
 
-(defun nano-modeline-compose (status name primary secondary)
+(defsubst nano-modeline-active ()
+  "Return non-nil if the selected window has an active modeline."
+  (eq (selected-window) nano-modeline--active-window))
+
+(defun nano-modeline-compose (name primary secondary &optional status)
   "Compose a string with provided information"
   (let* ((char-width    (window-font-width nil 'header-line))
-         (window        (get-buffer-window (current-buffer)))
-	 (active        (eq window nano-modeline--selected-window))
+	 (active        (nano-modeline-active))
+         (dedicated     (window-dedicated-p))
          (space-up       +0.20)
          (space-down     -0.25)
-	 (prefix (cond ((string= status "RO")
-			(propertize (if (window-dedicated-p)" -- " " RO ")
-				    'face (if active 'nano-modeline-active-status-RO
-					             'nano-modeline-inactive-status-RO)))
-                       ((string= status "**")
-			(propertize (if (window-dedicated-p)" -- " " ** ")
-				    'face (if active 'nano-modeline-active-status-**
-					             'nano-modeline-inactive-status-**)))
-                       ((string= status "RW")
-			(propertize (if (window-dedicated-p)" -- " " RW ")
-				    'face (if active 'nano-modeline-active-status-RW
-					             'nano-modeline-inactive-status-RW)))
-		       (t (propertize status
-				      'face (if active 'nano-modeline-active-status-**
-					               'nano-modeline-inactive-status-**)))))
+	 (prefix
+          (cond (status
+                 (propertize status
+                             'face
+                             (if active 'nano-modeline-active-status-**
+                               'nano-modeline-inactive-status-**)))
+                ((and buffer-file-name (buffer-modified-p))
+                 ((string= status "**")
+                  (propertize (if dedicated" -- " " ** ")
+                              'face (if active 'nano-modeline-active-status-**
+                                      'nano-modeline-inactive-status-**))))
+                (buffer-read-only
+                 (propertize (if dedicated" -- " " RO ")
+                             'face (if active 'nano-modeline-active-status-RO
+                                     'nano-modeline-inactive-status-RO)))
+                (t
+                 (propertize (if dedicated" -- " " RW ")
+                             'face (if active 'nano-modeline-active-status-RW
+                                     'nano-modeline-inactive-status-RW)))))
          (left (concat
                 (propertize " "  'face (if active 'nano-modeline-active
 					          'nano-modeline-inactive)
@@ -278,8 +286,7 @@ Modeline is composed as:
   (bound-and-true-p org-capture-mode))
 
 (defun nano-modeline-org-capture-mode ()
-  (nano-modeline-compose (nano-modeline-status)
-                         "Capture"
+  (nano-modeline-compose "Capture"
                          "(org)"
                          ""))
 
@@ -326,8 +333,7 @@ Modeline is composed as:
   (derived-mode-p 'Info-mode))
 
 (defun nano-modeline-info-mode ()
-  (nano-modeline-compose (nano-modeline-status)
-                         "Info"
+  (nano-modeline-compose "Info"
                          (concat "("
                                  (nano-modeline-info-breadcrumbs)
                                  ")")
@@ -338,8 +344,7 @@ Modeline is composed as:
   (derived-mode-p 'org-agenda-mode))
 
 (defun nano-modeline-org-agenda-mode ()
-  (nano-modeline-compose (nano-modeline-status)
-                         "Agenda"
+  (nano-modeline-compose "Agenda"
                          ""
                          (format-time-string "%A %-e %B %Y")))
 
@@ -351,10 +356,10 @@ Modeline is composed as:
   (derived-mode-p 'vterm-mode))
 
 (defun nano-modeline-term-mode ()
-  (nano-modeline-compose " >_ "
-                         "Terminal"
+  (nano-modeline-compose "Terminal"
                          (concat "(" shell-file-name ")")
-                         (shorten-directory default-directory 32)))
+                         (nano-modeline-shorten-directory default-directory 32)
+                         " >_ "))
 
 ;; ---------------------------------------------------------------------
 ;; (defun nano-modeline-mu4e-main-mode-p ()
@@ -420,8 +425,7 @@ Modeline is composed as:
   (derived-mode-p 'message-mode))
 
 (defun nano-modeline-message-mode ()
-  (nano-modeline-compose (nano-modeline-status)
-                         "Message" "(draft)" ""))
+  (nano-modeline-compose "Message" "(draft)" ""))
 
 
 ;; ---------------------------------------------------------------------
@@ -439,8 +443,7 @@ Modeline is composed as:
           (mode-name   (nano-mode-name))
           (branch      (vc-branch))
           (position    (format-mode-line "%l:%c")))
-      (nano-modeline-compose (nano-modeline-status)
-                             buffer-name 
+      (nano-modeline-compose buffer-name
                              (concat "(" mode-name
                                      (if branch (concat ", "
                                              (propertize branch 'face 'italic)))
@@ -483,13 +486,13 @@ Modeline is composed as:
 			    (number-to-string (pdf-cache-number-of-pages)))
 			  "???"))))
     (nano-modeline-compose
-     "RW"
      buffer-name
      (concat "(" mode-name
 	     (if branch (concat ", "
 				(propertize branch 'face 'italic)))
 	     ")" )
-     page-number)))
+     page-number
+     "RW")))
 
 ;; ---------------------------------------------------------------------
 (defun nano-modeline-buffer-menu-mode-p ()
@@ -500,8 +503,7 @@ Modeline is composed as:
           (mode-name   (nano-mode-name))
           (position    (format-mode-line "%l:%c")))
 
-      (nano-modeline-compose (nano-modeline-status)
-                             buffer-name "" position)))
+      (nano-modeline-compose buffer-name "" position)))
 ;;(defun buffer-menu-mode-header-line ()
 ;;  (face-remap-add-relative
 ;;   'header-line `(:background ,(face-background 'nano-subtle))))
@@ -518,8 +520,7 @@ Modeline is composed as:
           (mode-name   (nano-mode-name))
           (position    (format-mode-line "%l:%c")))
 
-      (nano-modeline-compose (nano-modeline-status)
-                             buffer-name "" position)))
+      (nano-modeline-compose buffer-name "" position)))
 ;; ---------------------------------------------------------------------
 ;; (with-eval-after-load 'deft
 ;;   (defun deft-print-header ()
@@ -552,22 +553,13 @@ Modeline is composed as:
           (mode-name   (nano-mode-name))
           (branch      (vc-branch))
           (position    (format-mode-line "%l:%c")))
-      (nano-modeline-compose (nano-modeline-status)
-                             buffer-name
+      (nano-modeline-compose buffer-name
                              (concat "(" mode-name
                                      (if branch (concat ", "
                                             (propertize branch 'face 'italic)))
                                      ")" )
                              position)))
 
-;; ---------------------------------------------------------------------
-(defun nano-modeline-status ()
-  "Return buffer status: read-only (RO), modified (**) or read-write (RW)"
-  
-  (let ((read-only   buffer-read-only)
-        (modified    (and buffer-file-name (buffer-modified-p))))
-    (cond (modified  "**") (read-only "RO") (t "RW"))))
-  
 ;; ---------------------------------------------------------------------
 (defun nano-modeline-mu4e-context ()
   "Return the current mu4e context as a non propertized string."
@@ -663,10 +655,15 @@ Modeline is composed as:
 
 
 
+(defun nano-modeline-set-selected-window-h (&rest _)
+    "Track the active modeline's window in `nano-modeline--active-window'."
+    (let ((win (selected-window)))
+      (unless (minibuffer-window-active-p win)
+        (setq nano-modeline--active-window (frame-selected-window)))))
+
 ;; This hooks is necessary to register selected window because when
 ;;  a modeline is evaluated, the corresponding window is always selected.
-(add-hook 'post-command-hook
-	  (lambda () (setq nano-modeline--selected-window (selected-window))))
+(add-hook 'pre-redisplay-functions #'nano-modeline-set-selected-window-h)
 
 (nano-modeline)
 
