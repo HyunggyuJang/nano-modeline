@@ -149,10 +149,6 @@ If DEFAULT is non-nil, set the default mode-line for all buffers."
         (concat "#" (substring-no-properties vc-mode
                                              (+ (if (eq backend 'Hg) 2 3) 2))))  nil))
 
-(defsubst nano-mode-name ()
-  (format-mode-line mode-name))
-
-
 ;; From https://amitp.blogspot.com/2011/08/emacs-custom-mode-line.html
 (defun nano-modeline-shorten-directory (dir max-length)
   "Show up to `max-length' characters of a directory name `dir'."
@@ -426,7 +422,7 @@ If DEFAULT is non-nil, set the default mode-line for all buffers."
 
 ;; (defun nano-modeline-org-clock-mode ()
 ;;   (let ((buffer-name (format-mode-line "%b"))
-;;         (mode-name   (nano-mode-name))
+;;
 ;;         (branch      (vc-branch))
 ;;         (position    (format-mode-line "%l:%c")))
 ;;     (nano-modeline-compose buffer-name
@@ -439,7 +435,6 @@ If DEFAULT is non-nil, set the default mode-line for all buffers."
 ;; ---------------------------------------------------------------------
 (defun nano-modeline-pdf-view-mode ()
   (let ((buffer-name (format-mode-line "%b"))
-        (mode-name   (nano-mode-name))
         (branch      (vc-branch))
         (page-number (concat
                       (number-to-string (pdf-view-current-page)) "/"
@@ -458,7 +453,6 @@ If DEFAULT is non-nil, set the default mode-line for all buffers."
 ;; ---------------------------------------------------------------------
 (defun nano-modeline-buffer-menu-mode ()
   (let ((buffer-name "Buffer list")
-        (mode-name   (nano-mode-name))
         (position    (format-mode-line "%l:%c")))
     (nano-modeline-compose buffer-name "" position)))
 (defun buffer-menu-mode-header-line ()
@@ -470,7 +464,6 @@ If DEFAULT is non-nil, set the default mode-line for all buffers."
 
 (defun nano-modeline-completion-list-mode ()
   (let ((buffer-name (format-mode-line "%b"))
-        (mode-name   (nano-mode-name))
         (position    (format-mode-line "%l:%c")))
 
     (nano-modeline-compose buffer-name "" position)))
@@ -497,7 +490,6 @@ If DEFAULT is non-nil, set the default mode-line for all buffers."
 ;; ---------------------------------------------------------------------
 (defun nano-modeline-default-mode ()
   (let ((buffer-name (format-mode-line "%b"))
-        (mode-name   (nano-mode-name))
         (branch      (vc-branch))
         (position    (format-mode-line "%l:%c")))
     (nano-modeline-compose buffer-name
