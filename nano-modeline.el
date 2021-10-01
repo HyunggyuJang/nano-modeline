@@ -3,6 +3,8 @@
 ;; GNU Emacs / N Λ N O Modeline
 ;; Copyright (C) 2020-2021 - N Λ N O developers 
 ;;
+;; Package-Requires: ((emacs "27.1"))
+;;
 ;; This file is not part of GNU Emacs.
 ;;
 ;; This program is free software: you can redistribute it and/or
@@ -23,13 +25,19 @@
 ;; [ status | name (primary)                               secondary ]
 ;;
 ;; -------------------------------------------------------------------
+;;
+;;; Code:
+
 (require 's)
 (require 'cl-lib)
 
 (declare-function transient--show "ext:transient")
+(declare-function pdf-view-current-page "ext:pdf-view")
+(declare-function pdf-cache-number-of-pages "ext:pdf-view")
 
 (defgroup nano nil
-  "N Λ N O")
+  "N Λ N O"
+  :group 'appearance)
 
 (defgroup nano-modeline nil
   "Modeline settings"
@@ -109,7 +117,7 @@ Modeline is composed as:
   :group 'nano-modeline-inactive)
 
 ;; Core
-(defsubst nano-modeline (key)
+(defsubst nano-modeline-format (key)
   "Return a mode-line configuration associated with KEY (a symbol).
 Throws an error if it doesn't exist."
   (let ((fn (intern-soft (format "nano-modeline-%s-mode" key))))
@@ -119,12 +127,11 @@ Throws an error if it doesn't exist."
 (defun nano-modeline-set-modeline! (key &optional default)
   "Set the modeline format. Does nothing if the modeline KEY doesn't exist.
 If DEFAULT is non-nil, set the default mode-line for all buffers."
-  (if-let ((modeline (nano-modeline key)))
-      (setf (if default
-                (default-value 'header-line-format)
-              (buffer-local-value 'header-line-format (current-buffer)))
-            (list modeline))
-    (error "Could not find %S modeline format" name)))
+  (when-let ((modeline (nano-modeline-format key)))
+    (setf (if default
+              (default-value 'header-line-format)
+            (buffer-local-value 'header-line-format (current-buffer)))
+          (list modeline))))
 
 (defun nano-set-modeline-hook! (hooks name)
   "Set the modeline to NAME on HOOKS. "
@@ -519,6 +526,7 @@ If DEFAULT is non-nil, set the default mode-line for all buffers."
   (add-hook 'pre-redisplay-functions #'nano-modeline-set-selected-window-h)
 
   (setq eshell-status-in-modeline nil)
+  (setq-default mode-line-format (list ""))
   (defun nano-modeline-transient-respect-header-line
       (orig-fn &rest args)
     (let ((erase-buffer
@@ -536,14 +544,6 @@ If DEFAULT is non-nil, set the default mode-line for all buffers."
   (advice-add #'transient--show
               :around
               #'nano-modeline-transient-respect-header-line)
-
-  (after! transient
-    (defadvice! +transient-respect-header-line (orig-fn &rest args)
-      :around #'transient--show
-      (letf! (defun erase-buffer ()
-               (funcall erase-buffer)
-               (setq header-line-format nil))
-        (apply orig-fn args))))
 
   (nano-modeline-set-modeline! 'default t)
   (nano-set-modeline-hook! 'message-mode-hook 'message)
