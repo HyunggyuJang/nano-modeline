@@ -3,7 +3,9 @@
 ;; GNU Emacs / N Λ N O Modeline
 ;; Copyright (C) 2020-2021 - N Λ N O developers 
 ;;
+;; Version: 0.0.1
 ;; Package-Requires: ((emacs "27.1"))
+;; Homepage: https://github.com/rougier/nano-modeline
 ;;
 ;; This file is not part of GNU Emacs.
 ;;
@@ -19,6 +21,8 @@
 ;;
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program. If not, see <http://www.gnu.org/licenses/>
+;;
+;;; Commentary:
 ;; -------------------------------------------------------------------
 ;;
 ;; Modeline is rendered as:
@@ -34,10 +38,6 @@
 (declare-function transient--show "ext:transient")
 (declare-function pdf-view-current-page "ext:pdf-view")
 (declare-function pdf-cache-number-of-pages "ext:pdf-view")
-
-(defgroup nano nil
-  "N Λ N O"
-  :group 'appearance)
 
 (defgroup nano-modeline nil
   "Modeline settings"
@@ -133,7 +133,7 @@ If DEFAULT is non-nil, set the default mode-line for all buffers."
             (buffer-local-value 'header-line-format (current-buffer)))
           (list modeline))))
 
-(defun nano-set-modeline-hook! (hooks name)
+(defun nano-modeline-set-hook! (hooks name)
   "Set the modeline to NAME on HOOKS. "
   (let ((fn (intern (format "nano-modeline-set-%s-format-h" name))))
     (fset fn
@@ -546,18 +546,18 @@ If DEFAULT is non-nil, set the default mode-line for all buffers."
               #'nano-modeline-transient-respect-header-line)
 
   (nano-modeline-set-modeline! 'default t)
-  (nano-set-modeline-hook! 'message-mode-hook 'message)
-  (nano-set-modeline-hook! 'Info-mode-hook 'info)
+  (nano-modeline-set-hook! 'message-mode-hook 'message)
+  (nano-modeline-set-hook! 'Info-mode-hook 'info)
   (setq Info-use-header-line nil)
-  (nano-set-modeline-hook! 'org-capture-mode-hook 'org-capture)
-  (nano-set-modeline-hook! 'org-agenda-mode-hook 'org-agenda)
-  (nano-set-modeline-hook! '(vterm-mode-hook term-mode-hook) 'term)
-  (nano-set-modeline-hook! 'pdf-view-mode-hook 'pdf-view)
-  (nano-set-modeline-hook! 'completion-list-mode-hook 'completion-list)
+  (nano-modeline-set-hook! 'org-capture-mode-hook 'org-capture)
+  (nano-modeline-set-hook! 'org-agenda-mode-hook 'org-agenda)
+  (nano-modeline-set-hook! '(vterm-mode-hook term-mode-hook) 'term)
+  (nano-modeline-set-hook! 'pdf-view-mode-hook 'pdf-view)
+  (nano-modeline-set-hook! 'completion-list-mode-hook 'completion-list)
   (add-hook 'Buffer-menu-mode-hook
             #'buffer-menu-mode-header-line)
   (setq Buffer-menu-use-header-line nil)
-  (nano-set-modeline-hook! 'buffer-menu-mode-hook 'buffer-menu))
+  (nano-modeline-set-hook! 'buffer-menu-mode-hook 'buffer-menu))
 
 
 
@@ -568,3 +568,4 @@ If DEFAULT is non-nil, set the default mode-line for all buffers."
       (setq nano-modeline--active-window (frame-selected-window)))))
 
 (provide 'nano-modeline)
+;;; nano-modeline.el ends here
